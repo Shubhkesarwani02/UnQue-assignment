@@ -1,14 +1,11 @@
 const mongoose = require("mongoose");
 const supertest = require("supertest");
-const { MongoMemoryServer } = require("mongodb-memory-server");
+// Remove MongoDB Memory Server import
 const app = require("../app");
 const User = require("../models/User");
 
 // Create request object
 const request = supertest(app);
-
-// In-memory MongoDB instance
-let mongoServer;
 
 // Test user data
 const studentA1 = {
@@ -34,26 +31,28 @@ const professorP1 = {
 
 describe("College Appointment System E2E Test", () => {
   beforeAll(async () => {
-    // Start in-memory MongoDB server
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
+    // Connect to test database on Atlas
+    const testDbUri = process.env.MONGO_URI.replace("?", "test?");
 
-    // Connect to in-memory database
-    await mongoose.connect(uri, {
+    // Connect to the test database
+    await mongoose.connect(testDbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
   });
 
   afterAll(async () => {
-    // Disconnect and stop MongoDB server
+    // Disconnect from MongoDB
     await mongoose.disconnect();
-    await mongoServer.stop();
   });
 
   // Clear data between tests
   beforeEach(async () => {
-    await User.deleteMany({});
+    // Clear all collections
+    const collections = await mongoose.connection.db.collections();
+    for (const collection of collections) {
+      await collection.deleteMany({});
+    }
   });
 
   test("End-to-End Appointment Flow", async () => {
