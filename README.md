@@ -42,7 +42,7 @@ college-appointment-system/
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js
 - MongoDB Atlas account or local MongoDB instance
 - Postman or ThunderClient(for manual API testing)
 
@@ -50,7 +50,7 @@ college-appointment-system/
 
 1. Clone the repository:
    ```
-   git clone <https://github.com/Shubhkesarwani02/UnQue-assignment.git>
+   git clone https://github.com/Shubhkesarwani02/UnQue-assignment.git
    cd college-appointment-system
    ```
 
@@ -64,7 +64,7 @@ college-appointment-system/
    NODE_ENV=development
    PORT=<your_port>
    MONGO_URI=<your_mongodb_uri>
-   JWT_SECRET=your_jwt_secret_key
+   JWT_SECRET=your_secret_key
    ```
 
 4. Start the server:
@@ -153,10 +153,3 @@ The E2E test (`tests/e2e.test.js`) validates the following flow:
 - API endpoints are protected with JWT authentication
 - Environment variables are used to store sensitive information
 
-## Future Improvements
-
-- Add pagination for appointment and availability listings
-- Implement email notifications for appointment bookings and cancellations
-- Add support for recurring availability slots
-- Create a frontend interface for the system
-- Implement more comprehensive validation and error handling
