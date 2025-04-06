@@ -1,13 +1,10 @@
 const mongoose = require("mongoose");
 const supertest = require("supertest");
-// Remove MongoDB Memory Server import
 const app = require("../app");
 const User = require("../models/User");
 
-// Create request object
 const request = supertest(app);
 
-// Test user data
 const studentA1 = {
   name: "Student A1",
   email: "student1@example.com",
@@ -31,10 +28,7 @@ const professorP1 = {
 
 describe("College Appointment System E2E Test", () => {
   beforeAll(async () => {
-    // Connect to test database on Atlas
     const testDbUri = process.env.MONGO_URI.replace("?", "test?");
-
-    // Connect to the test database
     await mongoose.connect(testDbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -42,13 +36,10 @@ describe("College Appointment System E2E Test", () => {
   });
 
   afterAll(async () => {
-    // Disconnect from MongoDB
     await mongoose.disconnect();
   });
 
-  // Clear data between tests
   beforeEach(async () => {
-    // Clear all collections
     const collections = await mongoose.connection.db.collections();
     for (const collection of collections) {
       await collection.deleteMany({});
@@ -56,7 +47,6 @@ describe("College Appointment System E2E Test", () => {
   });
 
   test("End-to-End Appointment Flow", async () => {
-    // 1. Student A1 authenticates to access the system
     console.log("1. Student A1 authenticates");
     const registerA1 = await request.post("/api/auth/register").send(studentA1);
     expect(registerA1.status).toBe(201);
@@ -64,7 +54,6 @@ describe("College Appointment System E2E Test", () => {
 
     const tokenA1 = registerA1.body.token;
 
-    // 2. Professor P1 authenticates to access the system
     console.log("2. Professor P1 authenticates");
     const registerP1 = await request
       .post("/api/auth/register")
@@ -75,12 +64,10 @@ describe("College Appointment System E2E Test", () => {
     const tokenP1 = registerP1.body.token;
     const professorId = registerP1.body._id;
 
-    // 3. Professor P1 specifies availability
     console.log("3. Professor P1 specifies availability");
-    // Create two time slots: T1 and T2
     const slot1 = {
-      startTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
-      endTime: new Date(Date.now() + 25 * 60 * 60 * 1000), // Tomorrow + 1 hour
+      startTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      endTime: new Date(Date.now() + 25 * 60 * 60 * 1000),
     };
 
     const availabilityT1 = await request
@@ -90,8 +77,8 @@ describe("College Appointment System E2E Test", () => {
     expect(availabilityT1.status).toBe(201);
 
     const slot2 = {
-      startTime: new Date(Date.now() + 26 * 60 * 60 * 1000), // Tomorrow + 2 hours
-      endTime: new Date(Date.now() + 27 * 60 * 60 * 1000), // Tomorrow + 3 hours
+      startTime: new Date(Date.now() + 26 * 60 * 60 * 1000),
+      endTime: new Date(Date.now() + 27 * 60 * 60 * 1000),
     };
 
     const availabilityT2 = await request
@@ -100,7 +87,6 @@ describe("College Appointment System E2E Test", () => {
       .send(slot2);
     expect(availabilityT2.status).toBe(201);
 
-    // 4. Student A1 views available time slots for Professor P1
     console.log("4. Student A1 views available slots");
     const availableSlots = await request
       .get(`/api/availability/professor/${professorId}`)
@@ -108,7 +94,6 @@ describe("College Appointment System E2E Test", () => {
     expect(availableSlots.status).toBe(200);
     expect(availableSlots.body.length).toBe(2);
 
-    // 5. Student A1 books an appointment with Professor P1 for time T1
     console.log("5. Student A1 books appointment at T1");
     const bookingA1 = await request
       .post("/api/appointments")
@@ -119,7 +104,6 @@ describe("College Appointment System E2E Test", () => {
       });
     expect(bookingA1.status).toBe(201);
 
-    // 6. Student A2 authenticates to access the system
     console.log("6. Student A2 authenticates");
     const registerA2 = await request.post("/api/auth/register").send(studentA2);
     expect(registerA2.status).toBe(201);
@@ -127,7 +111,6 @@ describe("College Appointment System E2E Test", () => {
 
     const tokenA2 = registerA2.body.token;
 
-    // 7. Student A2 books an appointment with Professor P1 for time T2
     console.log("7. Student A2 books appointment at T2");
     const bookingA2 = await request
       .post("/api/appointments")
@@ -138,21 +121,18 @@ describe("College Appointment System E2E Test", () => {
       });
     expect(bookingA2.status).toBe(201);
 
-    // Student A1 checks appointments (should see one)
     const appointmentsBeforeCancel = await request
       .get("/api/appointments/student")
       .set("Authorization", `Bearer ${tokenA1}`);
     expect(appointmentsBeforeCancel.status).toBe(200);
     expect(appointmentsBeforeCancel.body.length).toBe(1);
 
-    // 8. Professor P1 cancels the appointment with Student A1
     console.log("8. Professor P1 cancels appointment with A1");
     const cancelAppointment = await request
       .put(`/api/appointments/${bookingA1.body._id}/cancel`)
       .set("Authorization", `Bearer ${tokenP1}`);
     expect(cancelAppointment.status).toBe(200);
 
-    // 9. Student A1 checks appointments (should see none)
     console.log("9. Student A1 verifies no pending appointments");
     const appointmentsAfterCancel = await request
       .get("/api/appointments/student")
@@ -161,5 +141,5 @@ describe("College Appointment System E2E Test", () => {
     expect(appointmentsAfterCancel.body.length).toBe(0);
 
     console.log("End-to-End test completed successfully!");
-  }, 30000); // Increased timeout for the complete flow
+  }, 30000);
 });
