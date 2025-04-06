@@ -1,150 +1,162 @@
-Here’s a clean and informative `README.md` for your project:
+# College Appointment System
 
-````markdown
-# 🎓 College Appointment Booking System
+A backend API system built with Node.js, Express, and MongoDB that enables students to book appointments with professors. This system allows professors to specify their availability, manage bookings, and students to authenticate, view available slots, and book appointments.
 
-A backend API built with **Node.js**, **Express**, and **MongoDB** that enables students to book appointments with professors. The system allows authentication, slot management, and appointment handling. Includes an automated end-to-end (E2E) test case.
+## Project Overview
 
-## 📁 Repository
-
-[GitHub Repository](https://github.com/Shubhkesarwani02/UnQue-assignment)
-
----
-
-## 📌 Features
-
-- User Authentication (Students & Professors)
+This project implements a RESTful API for a college appointment booking system with the following features:
+- User authentication (for both students and professors)
 - Professor availability management
-- Appointment booking & cancellation
-- View available slots
-- E2E test case simulating full appointment flow
+- Appointment booking and cancellation
+- E2E testing to validate the full user flow
 
----
-
-## 📖 User Flow
-
-1. **Student A1** logs in to access the system.
-2. **Professor P1** logs in to access the system.
-3. **Professor P1** sets available time slots.
-4. **Student A1** views available slots for **Professor P1**.
-5. **Student A1** books an appointment for time **T1**.
-6. **Student A2** logs in.
-7. **Student A2** books an appointment for time **T2**.
-8. **Professor P1** cancels the appointment with **Student A1**.
-9. **Student A1** checks appointments and sees none are pending.
-
----
-
-## 🗃️ Database Schema
-
-- **Users Collection**
-
-  - Roles: Student, Professor
-  - Fields: Name, Email, Password, Role
-
-- **Availability Collection**
-
-  - Professor reference
-  - Available time slots
-
-- **Appointments Collection**
-  - Student & Professor references
-  - Booked time
-  - Status (booked/cancelled)
-
----
-
-## 🧪 Testing
-
-Includes an **E2E test case** (`tests/e2e.test.js`) using **Jest** and **Supertest**, with **mongodb-memory-server** for in-memory test DB.
-
-Run tests:
-
-```bash
-npm test
-```
-````
-
----
-
-## 🚀 Getting Started
-
-### 📦 Install Dependencies
-
-```bash
-npm install
-```
-
-### ⚙️ Setup Environment
-
-Create a `.env` file:
-
-```env
-NODE_ENV=development
-PORT=5000
-MONGO_URI=<your_mongo_connection_string>
-JWT_SECRET=your_jwt_secret_key
-```
-
-### ▶️ Start Server
-
-```bash
-npm run dev
-```
-
----
-
-## 📂 Project Structure
+## File Structure
 
 ```
 college-appointment-system/
 ├── config/
-│   └── db.js
+│   └── db.js                  # Database connection configuration
 ├── models/
-│   ├── User.js
-│   ├── Availability.js
-│   └── Appointment.js
+│   ├── User.js                # User model (students and professors)
+│   ├── Availability.js        # Professor availability model
+│   └── Appointment.js         # Appointment model
 ├── controllers/
-│   ├── authController.js
-│   ├── availabilityController.js
-│   └── appointmentController.js
+│   ├── authController.js      # Authentication logic
+│   ├── availabilityController.js  # Availability management
+│   └── appointmentController.js   # Appointment management
 ├── routes/
-│   ├── authRoutes.js
-│   ├── availabilityRoutes.js
-│   └── appointmentRoutes.js
+│   ├── authRoutes.js          # Authentication routes
+│   ├── availabilityRoutes.js  # Availability routes
+│   └── appointmentRoutes.js   # Appointment routes
 ├── middleware/
-│   └── auth.js
+│   └── auth.js                # Authentication middleware
 ├── tests/
-│   └── e2e.test.js
-├── .env
-├── app.js
-├── server.js
-└── package.json
+│   └── e2e.test.js            # E2E test for the required flow
+├── .env                       # Environment variables
+├── app.js                     # Express app setup
+├── server.js                  # Server entry point
+└── package.json               # Project dependencies
 ```
 
----
+## Getting Started
 
-## 🛠 Tech Stack
+### Prerequisites
 
-- **Backend**: Node.js, Express
-- **Database**: MongoDB with Mongoose
-- **Auth**: JWT + bcrypt
-- **Testing**: Jest, Supertest, mongodb-memory-server
+- Node.js (v14 or higher)
+- MongoDB Atlas account or local MongoDB instance
+- Postman or ThunderClient(for manual API testing)
 
----
+### Installation
 
-## 📃 License
+1. Clone the repository:
+   ```
+   git clone <https://github.com/Shubhkesarwani02/UnQue-assignment.git>
+   cd college-appointment-system
+   ```
 
-This project is licensed for educational and evaluation use.
+2. Install dependencies:
+   ```
+   npm install
+   ```
 
----
+3. Create a `.env` file in the root directory with the following variables:
+   ```
+   NODE_ENV=development
+   PORT=<your_port>
+   MONGO_URI=<your_mongodb_uri>
+   JWT_SECRET=your_jwt_secret_key
+   ```
 
-## ✍️ Author
+4. Start the server:
+   ```
+   npm run dev
+   ```
 
-**Shubh Kesarwani**  
-🔗 [GitHub](https://github.com/Shubhkesarwani02)
+## API Endpoints
+
+### Authentication
+
+- **Register User**
+  - `POST /api/auth/register`
+  - Body: `{ name, email, password, role }`
+  - Role can be either "student" or "professor"
+
+- **Login User**
+  - `POST /api/auth/login`
+  - Body: `{ email, password }`
+
+### Availability
+
+- **Add Availability (Professor only)**
+  - `POST /api/availability`
+  - Body: `{ startTime, endTime }`
+  - Requires authentication token
+
+- **Get Professor's Available Slots**
+  - `GET /api/availability/professor/:professorId`
+  - Requires authentication token
+
+### Appointments
+
+- **Book Appointment (Student only)**
+  - `POST /api/appointments`
+  - Body: `{ availabilityId, professorId }`
+  - Requires authentication token
+
+- **Cancel Appointment**
+  - `PUT /api/appointments/:appointmentId/cancel`
+  - Requires authentication token (Professor or Student)
+
+- **Get Student's Appointments**
+  - `GET /api/appointments/student`
+  - Requires authentication token (Student)
+
+- **Get Professor's Appointments**
+  - `GET /api/appointments/professor`
+  - Requires authentication token (Professor)
+
+## Testing
+
+The project includes end-to-end (E2E) tests that validate the entire user flow as described in the requirements.
+
+### Running Tests
 
 ```
-
-Let me know if you'd like to add API documentation (like sample requests/responses), or deploy instructions.
+npm test
 ```
+
+### Test Flow
+
+The E2E test (`tests/e2e.test.js`) validates the following flow:
+
+1. Student A1 authenticates to access the system
+2. Professor P1 authenticates to access the system
+3. Professor P1 specifies which time slots he is free for appointments
+4. Student A1 views available time slots for Professor P1
+5. Student A1 books an appointment with Professor P1 for time T1
+6. Student A2 authenticates to access the system
+7. Student A2 books an appointment with Professor P1 for time T2
+8. Professor P1 cancels the appointment with Student A1
+9. Student A1 checks their appointments and realizes they do not have any pending appointments
+
+## Technologies Used
+
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JSON Web Tokens (JWT)
+- **Testing**: Jest, Supertest
+- **Development**: Nodemon
+
+## Security Notes
+
+- User passwords are hashed using bcryptjs before storing in the database
+- API endpoints are protected with JWT authentication
+- Environment variables are used to store sensitive information
+
+## Future Improvements
+
+- Add pagination for appointment and availability listings
+- Implement email notifications for appointment bookings and cancellations
+- Add support for recurring availability slots
+- Create a frontend interface for the system
+- Implement more comprehensive validation and error handling
